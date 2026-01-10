@@ -14,7 +14,249 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_automations: {
+        Row: {
+          config: Json | null
+          created_at: string
+          enabled: boolean | null
+          id: string
+          last_run: string | null
+          name: string
+          run_count: number | null
+          type: Database["public"]["Enums"]["automation_type"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          last_run?: string | null
+          name: string
+          run_count?: number | null
+          type: Database["public"]["Enums"]["automation_type"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          enabled?: boolean | null
+          id?: string
+          last_run?: string | null
+          name?: string
+          run_count?: number | null
+          type?: Database["public"]["Enums"]["automation_type"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      inventory: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          min_stock: number
+          name: string
+          price: number
+          quantity: number
+          sku: string
+          status: Database["public"]["Enums"]["inventory_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          min_stock?: number
+          name: string
+          price?: number
+          quantity?: number
+          sku: string
+          status?: Database["public"]["Enums"]["inventory_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          min_stock?: number
+          name?: string
+          price?: number
+          quantity?: number
+          sku?: string
+          status?: Database["public"]["Enums"]["inventory_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          ai_score: number | null
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          last_contact: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          source: string | null
+          starred: boolean | null
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          ai_score?: number | null
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          last_contact?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          starred?: boolean | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          ai_score?: number | null
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          last_contact?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          source?: string | null
+          starred?: boolean | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          company_name: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          company_name?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          company_name?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scheduled_posts: {
+        Row: {
+          ai_generated: boolean | null
+          content: string
+          created_at: string
+          hashtags: string[] | null
+          id: string
+          media_urls: string[] | null
+          platforms: string[]
+          scheduled_time: string
+          status: Database["public"]["Enums"]["post_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          content: string
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          media_urls?: string[] | null
+          platforms?: string[]
+          scheduled_time: string
+          status?: Database["public"]["Enums"]["post_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_generated?: boolean | null
+          content?: string
+          created_at?: string
+          hashtags?: string[] | null
+          id?: string
+          media_urls?: string[] | null
+          platforms?: string[]
+          scheduled_time?: string
+          status?: Database["public"]["Enums"]["post_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      social_accounts: {
+        Row: {
+          access_token: string | null
+          account_name: string | null
+          connected: boolean | null
+          created_at: string
+          id: string
+          platform: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_name?: string | null
+          connected?: boolean | null
+          created_at?: string
+          id?: string
+          platform: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          account_name?: string | null
+          connected?: boolean | null
+          created_at?: string
+          id?: string
+          platform?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +265,14 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      automation_type:
+        | "content_generation"
+        | "auto_scheduling"
+        | "lead_scoring"
+        | "hashtag_generation"
+      inventory_status: "in_stock" | "low_stock" | "out_of_stock"
+      lead_status: "new" | "contacted" | "qualified" | "converted" | "lost"
+      post_status: "draft" | "scheduled" | "published" | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +399,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      automation_type: [
+        "content_generation",
+        "auto_scheduling",
+        "lead_scoring",
+        "hashtag_generation",
+      ],
+      inventory_status: ["in_stock", "low_stock", "out_of_stock"],
+      lead_status: ["new", "contacted", "qualified", "converted", "lost"],
+      post_status: ["draft", "scheduled", "published", "failed"],
+    },
   },
 } as const
