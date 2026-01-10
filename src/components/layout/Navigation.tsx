@@ -13,9 +13,13 @@ import {
   Menu,
   X,
   ChevronRight,
+  Zap,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface SidebarProps {
   activeTab: string;
@@ -29,6 +33,7 @@ const navItems = [
   { id: "inventory", label: "Inventory", icon: Package },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
   { id: "ai", label: "AI Assistant", icon: Sparkles },
+  { id: "automations", label: "Automations", icon: Zap },
   { id: "settings", label: "Settings", icon: Settings },
 ];
 
