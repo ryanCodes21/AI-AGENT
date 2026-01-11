@@ -6,19 +6,14 @@ const corsHeaders = {
 };
 
 interface AIRequest {
-  type: "content" | "hashtags" | "schedule" | "lead_score" | "chat";
+  type: string;
   prompt?: string;
-  leadData?: {
-    name: string;
-    company: string;
-    source: string;
-    value: number;
-  };
-  postData?: {
-    topic: string;
-    platform: string;
-    tone?: string;
-  };
+  leadData?: any;
+  postData?: any;
+  recordData?: any;
+  businessData?: any;
+  messageData?: any;
+  businessContext?: any;
 }
 
 serve(async (req) => {
@@ -27,7 +22,8 @@ serve(async (req) => {
   }
 
   try {
-    const { type, prompt, leadData, postData } = await req.json() as AIRequest;
+    const requestData = await req.json() as AIRequest;
+    const { type, prompt, leadData, postData, recordData, businessData, messageData, businessContext } = requestData;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -39,38 +35,61 @@ serve(async (req) => {
 
     switch (type) {
       case "content":
-        systemPrompt = `You are a social media content expert. Generate engaging, platform-specific content that drives engagement. Be creative, use emojis appropriately, and keep content concise yet impactful. Return ONLY the post content without any explanations.`;
+        systemPrompt = `You are a social media content expert. Generate engaging, platform-specific content. Be creative, use emojis. Return ONLY the post content.`;
         userPrompt = postData 
           ? `Create a ${postData.tone || "professional"} social media post for ${postData.platform} about: ${postData.topic}`
           : prompt || "Create an engaging social media post";
         break;
 
       case "hashtags":
-        systemPrompt = `You are a hashtag optimization expert. Generate relevant, trending hashtags that maximize reach and engagement. Return ONLY hashtags separated by spaces, nothing else.`;
+        systemPrompt = `You are a hashtag optimization expert. Generate relevant, trending hashtags. Return ONLY hashtags separated by spaces.`;
         userPrompt = prompt || "Generate trending hashtags for social media marketing";
         break;
 
-      case "schedule":
-        systemPrompt = `You are a social media scheduling expert. Analyze the best posting times based on platform and audience engagement patterns. Return a JSON object with recommended times.`;
-        userPrompt = postData 
-          ? `Suggest optimal posting times for ${postData.platform} for content about ${postData.topic}. Return JSON with format: { "times": ["HH:MM AM/PM"], "days": ["day"], "reason": "explanation" }`
-          : "Suggest optimal posting times for maximum engagement";
-        break;
-
       case "lead_score":
-        systemPrompt = `You are a sales intelligence expert. Analyze lead data and provide a score from 0-100 based on potential value, engagement likelihood, and conversion probability. Return ONLY a JSON object with score and brief reasoning.`;
+        systemPrompt = `You are a sales intelligence expert. Score leads from 0-100 based on value and conversion probability. Return JSON: { "score": number, "reason": "brief explanation", "priority": "high/medium/low" }`;
         userPrompt = leadData 
-          ? `Score this lead: Name: ${leadData.name}, Company: ${leadData.company}, Source: ${leadData.source}, Potential Value: $${leadData.value}. Return JSON: { "score": number, "reason": "brief explanation", "priority": "high/medium/low" }`
+          ? `Score this lead: Name: ${leadData.name}, Company: ${leadData.company}, Source: ${leadData.source}, Value: $${leadData.value}`
           : "Analyze lead potential";
         break;
 
-      case "chat":
-        systemPrompt = `You are a helpful AI assistant for social media management. Help users with content ideas, strategy, analytics interpretation, and marketing advice. Be concise and actionable.`;
-        userPrompt = prompt || "How can I improve my social media presence?";
+      case "record_analysis":
+        systemPrompt = `You are a business analyst. Analyze business records and provide actionable insights in 2-3 sentences. Focus on optimization, cost savings, or growth opportunities.`;
+        userPrompt = recordData 
+          ? `Analyze: Type: ${recordData.type}, Title: ${recordData.title}, Description: ${recordData.description || "N/A"}, Amount: $${recordData.amount || 0}, Category: ${recordData.category || "N/A"}`
+          : "Analyze business record";
+        break;
+
+      case "extract_lead":
+        systemPrompt = `You are a data extraction expert. Extract contact information from social media messages. Return JSON with name, phone, email if found.`;
+        userPrompt = messageData 
+          ? `Extract contact info from this ${messageData.platform} message: "${messageData.content}". Contact name: ${messageData.contactName || "Unknown"}`
+          : "Extract lead information";
+        break;
+
+      case "generate_campaign":
+        systemPrompt = `You are a marketing strategist. Generate a comprehensive campaign strategy including name, description, target audience, and platform recommendations. Keep it concise but actionable.`;
+        userPrompt = businessData 
+          ? `Create a campaign for a ${businessData.industry} business with goals: ${businessData.goals?.join(", ")}`
+          : "Generate a marketing campaign";
+        break;
+
+      case "swot_analysis":
+        systemPrompt = `You are a business strategist. Perform a SWOT analysis. Return JSON: { "strengths": ["..."], "weaknesses": ["..."], "opportunities": ["..."], "threats": ["..."] }. Each array should have 3-5 items.`;
+        userPrompt = businessData 
+          ? `SWOT for: ${businessData.followers} followers, ${businessData.engagementRate}% engagement, platforms: ${businessData.platforms?.join(", ")}, industry: ${businessData.industry}`
+          : "Perform SWOT analysis for a growing business";
+        break;
+
+      case "business_consultant":
+        const context = businessContext || {};
+        systemPrompt = `You are an expert business consultant specializing in campaign generation, business management, and growth strategies. ${context.name ? `The business is ${context.name}` : ""} ${context.location ? `located in ${context.location}` : ""} ${context.industry ? `in the ${context.industry} industry` : ""}. Provide specific, actionable advice. Be concise but thorough. Format responses with clear sections when appropriate.`;
+        userPrompt = prompt || "How can I grow my business?";
         break;
 
       default:
-        throw new Error("Invalid AI request type");
+        systemPrompt = `You are a helpful AI assistant for business and social media management. Be concise and actionable.`;
+        userPrompt = prompt || "How can I help you today?";
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -101,8 +120,6 @@ serve(async (req) => {
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
       throw new Error("AI gateway error");
     }
 

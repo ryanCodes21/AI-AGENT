@@ -6,64 +6,69 @@
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
+    /* Professional Business Theme - Navy/Slate */
+    --background: 222 47% 5%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 8%;
+    --card: 222 47% 7%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 10%;
+    --popover: 222 47% 9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 174 72% 56%;
-    --primary-foreground: 222 47% 6%;
+    /* Business Blue Primary */
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 5%;
 
-    --secondary: 222 30% 14%;
+    --secondary: 222 30% 12%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 222 30% 16%;
+    --muted: 222 30% 14%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 262 83% 58%;
-    --accent-foreground: 210 40% 98%;
+    /* Professional Gold Accent */
+    --accent: 45 93% 47%;
+    --accent-foreground: 222 47% 5%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 222 30% 18%;
-    --input: 222 30% 18%;
-    --ring: 174 72% 56%;
+    --border: 222 30% 16%;
+    --input: 222 30% 16%;
+    --ring: 217 91% 60%;
 
     --radius: 0.75rem;
 
-    /* Custom colors */
+    /* Status Colors */
     --success: 142 76% 36%;
     --success-foreground: 210 40% 98%;
     --warning: 38 92% 50%;
-    --warning-foreground: 222 47% 6%;
+    --warning-foreground: 222 47% 5%;
     --info: 199 89% 48%;
-    --info-foreground: 222 47% 6%;
+    --info-foreground: 222 47% 5%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(174 72% 56%) 0%, hsl(199 89% 48%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(280 87% 65%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(222 47% 10%) 0%, hsl(222 47% 8%) 100%);
-    --gradient-glow: radial-gradient(ellipse at center, hsl(174 72% 56% / 0.15) 0%, transparent 70%);
+    /* Gradients - Business Professional */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(199 89% 48%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(45 93% 47%) 0%, hsl(38 92% 50%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(222 47% 9%) 0%, hsl(222 47% 7%) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(217 91% 60% / 0.15) 0%, transparent 70%);
+    --gradient-business: linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(217 91% 20% / 0.3) 100%);
 
     /* Shadows */
-    --shadow-sm: 0 1px 2px hsl(222 47% 6% / 0.5);
-    --shadow-md: 0 4px 6px -1px hsl(222 47% 6% / 0.5);
-    --shadow-lg: 0 10px 15px -3px hsl(222 47% 6% / 0.5);
-    --shadow-glow: 0 0 40px hsl(174 72% 56% / 0.2);
+    --shadow-sm: 0 1px 2px hsl(222 47% 4% / 0.5);
+    --shadow-md: 0 4px 6px -1px hsl(222 47% 4% / 0.5);
+    --shadow-lg: 0 10px 15px -3px hsl(222 47% 4% / 0.5);
+    --shadow-glow: 0 0 40px hsl(217 91% 60% / 0.2);
 
-    --sidebar-background: 222 47% 7%;
+    /* Sidebar */
+    --sidebar-background: 222 47% 6%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 174 72% 56%;
-    --sidebar-primary-foreground: 222 47% 6%;
-    --sidebar-accent: 222 30% 14%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 5%;
+    --sidebar-accent: 222 30% 12%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 30% 15%;
-    --sidebar-ring: 174 72% 56%;
+    --sidebar-border: 222 30% 13%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -120,7 +125,7 @@
   }
 
   .glow-text {
-    text-shadow: 0 0 20px hsl(174 72% 56% / 0.5);
+    text-shadow: 0 0 20px hsl(217 91% 60% / 0.5);
   }
 
   .animate-float {
@@ -134,6 +139,16 @@
   .animate-shimmer {
     animation: shimmer 2s linear infinite;
     background-size: 200% 100%;
+  }
+
+  /* Mobile-friendly utilities */
+  .safe-area-inset {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
@@ -164,4 +179,12 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
+}
+
+/* Mobile scrollbar */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
 }
