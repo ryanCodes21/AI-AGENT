@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Sidebar, TopBar } from "@/components/layout/Navigation";
+import { Sidebar, TopBar, MobileNav } from "@/components/layout/Navigation";
 import { DashboardView } from "@/components/views/DashboardView";
 import { SchedulerView } from "@/components/views/SchedulerView";
 import { LeadsView } from "@/components/views/LeadsView";
@@ -9,15 +9,21 @@ import { AnalyticsView } from "@/components/views/AnalyticsView";
 import { AIAssistantView } from "@/components/views/AIAssistantView";
 import { AutomationsView } from "@/components/views/AutomationsView";
 import { SettingsView } from "@/components/views/SettingsView";
+import { RecordsView } from "@/components/views/RecordsView";
+import { InteractionsView } from "@/components/views/InteractionsView";
+import { CampaignsView } from "@/components/views/CampaignsView";
 import { supabase } from "@/integrations/supabase/client";
 
 const tabTitles: Record<string, string> = {
   dashboard: "Dashboard",
   scheduler: "Post Scheduler",
   leads: "Lead Tracking",
+  interactions: "Social Inbox",
+  campaigns: "Campaigns",
+  records: "Business Records",
   inventory: "Inventory Management",
-  analytics: "Analytics",
-  ai: "AI Assistant",
+  analytics: "Analytics & SWOT",
+  ai: "AI Business Consultant",
   automations: "AI Automations",
   settings: "Settings",
 };
@@ -52,6 +58,9 @@ const Index = () => {
       case "dashboard": return <DashboardView />;
       case "scheduler": return <SchedulerView />;
       case "leads": return <LeadsView />;
+      case "interactions": return <InteractionsView />;
+      case "campaigns": return <CampaignsView />;
+      case "records": return <RecordsView />;
       case "inventory": return <InventoryView />;
       case "analytics": return <AnalyticsView />;
       case "ai": return <AIAssistantView />;
@@ -70,11 +79,12 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 lg:pb-0">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="pl-64 transition-all duration-300">
+      <MobileNav activeTab={activeTab} onTabChange={setActiveTab} />
+      <main className="lg:pl-64 transition-all duration-300">
         <TopBar title={tabTitles[activeTab]} />
-        <div className="p-6">{renderView()}</div>
+        <div className="p-4 lg:p-6">{renderView()}</div>
       </main>
     </div>
   );

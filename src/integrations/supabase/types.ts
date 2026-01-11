@@ -53,6 +53,198 @@ export type Database = {
         }
         Relationships: []
       }
+      business_profile: {
+        Row: {
+          ai_recommendations: Json | null
+          ai_swot_analysis: Json | null
+          business_goals: string[] | null
+          business_name: string
+          business_type: string | null
+          city: string | null
+          competitors: string[] | null
+          country: string | null
+          created_at: string
+          employee_count: number | null
+          founded_year: number | null
+          id: string
+          industry: string | null
+          last_ai_analysis: string | null
+          location: string | null
+          main_products: string[] | null
+          monthly_budget: number | null
+          target_audience: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          ai_recommendations?: Json | null
+          ai_swot_analysis?: Json | null
+          business_goals?: string[] | null
+          business_name: string
+          business_type?: string | null
+          city?: string | null
+          competitors?: string[] | null
+          country?: string | null
+          created_at?: string
+          employee_count?: number | null
+          founded_year?: number | null
+          id?: string
+          industry?: string | null
+          last_ai_analysis?: string | null
+          location?: string | null
+          main_products?: string[] | null
+          monthly_budget?: number | null
+          target_audience?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          ai_recommendations?: Json | null
+          ai_swot_analysis?: Json | null
+          business_goals?: string[] | null
+          business_name?: string
+          business_type?: string | null
+          city?: string | null
+          competitors?: string[] | null
+          country?: string | null
+          created_at?: string
+          employee_count?: number | null
+          founded_year?: number | null
+          id?: string
+          industry?: string | null
+          last_ai_analysis?: string | null
+          location?: string | null
+          main_products?: string[] | null
+          monthly_budget?: number | null
+          target_audience?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      business_records: {
+        Row: {
+          ai_insights: string | null
+          ai_summary: string | null
+          amount: number | null
+          attachments: string[] | null
+          category: string | null
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          record_type: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_insights?: string | null
+          ai_summary?: string | null
+          amount?: number | null
+          attachments?: string[] | null
+          category?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          record_type: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_insights?: string | null
+          ai_summary?: string | null
+          amount?: number | null
+          attachments?: string[] | null
+          category?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          record_type?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      campaigns: {
+        Row: {
+          ai_generated: boolean | null
+          ai_insights: string | null
+          ai_performance_score: number | null
+          budget: number | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          goals: Json | null
+          id: string
+          metrics: Json | null
+          name: string
+          platforms: string[] | null
+          spent: number | null
+          start_date: string | null
+          status: string
+          target_audience: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_generated?: boolean | null
+          ai_insights?: string | null
+          ai_performance_score?: number | null
+          budget?: number | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          goals?: Json | null
+          id?: string
+          metrics?: Json | null
+          name: string
+          platforms?: string[] | null
+          spent?: number | null
+          start_date?: string | null
+          status?: string
+          target_audience?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_generated?: boolean | null
+          ai_insights?: string | null
+          ai_performance_score?: number | null
+          budget?: number | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          goals?: Json | null
+          id?: string
+          metrics?: Json | null
+          name?: string
+          platforms?: string[] | null
+          spent?: number | null
+          start_date?: string | null
+          status?: string
+          target_audience?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       inventory: {
         Row: {
           category: string | null
@@ -256,6 +448,68 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      social_interactions: {
+        Row: {
+          ai_extracted_data: Json | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          converted_to_lead: boolean | null
+          created_at: string
+          id: string
+          interaction_date: string
+          interaction_type: string
+          lead_id: string | null
+          message_content: string | null
+          platform: string
+          sentiment: string | null
+          source_post_id: string | null
+          user_id: string
+        }
+        Insert: {
+          ai_extracted_data?: Json | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          converted_to_lead?: boolean | null
+          created_at?: string
+          id?: string
+          interaction_date?: string
+          interaction_type: string
+          lead_id?: string | null
+          message_content?: string | null
+          platform: string
+          sentiment?: string | null
+          source_post_id?: string | null
+          user_id: string
+        }
+        Update: {
+          ai_extracted_data?: Json | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          converted_to_lead?: boolean | null
+          created_at?: string
+          id?: string
+          interaction_date?: string
+          interaction_type?: string
+          lead_id?: string | null
+          message_content?: string | null
+          platform?: string
+          sentiment?: string | null
+          source_post_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_interactions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
