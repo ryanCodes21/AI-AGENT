@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Settings,
@@ -9,10 +10,26 @@ import {
   CreditCard,
   HelpCircle,
   ChevronRight,
+  Save,
+  Building,
+  MapPin,
+  Target,
+  LogOut,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+
+interface BusinessProfile {
+  business_name: string;
+  industry: string | null;
+  location: string | null;
+  target_audience: string | null;
+  business_goals: string[] | null;
+}
 
 const settingSections = [
   {
@@ -63,6 +80,80 @@ const item = {
 };
 
 export function SettingsView() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [businessProfile, setBusinessProfile] = useState<BusinessProfile>({
+    business_name: "",
+    industry: "",
+    location: "",
+    target_audience: "",
+    business_goals: [],
+  });
+
+  useEffect(() => {
+    fetchBusinessProfile();
+  }, []);
+
+  const fetchBusinessProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("business_profile")
+        .select("*")
+        .eq("user_id", user.id)
+        .single();
+
+      if (data) {
+        setBusinessProfile({
+          business_name: data.business_name || "",
+          industry: data.industry || "",
+          location: data.location || "",
+          target_audience: data.target_audience || "",
+          business_goals: data.business_goals || [],
+        });
+      }
+    } catch (error) {
+      // Profile might not exist yet
+    }
+  };
+
+  const saveBusinessProfile = async () => {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in first");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("business_profile")
+        .upsert({
+          user_id: user.id,
+          business_name: businessProfile.business_name,
+          industry: businessProfile.industry || null,
+          location: businessProfile.location || null,
+          target_audience: businessProfile.target_audience || null,
+          business_goals: businessProfile.business_goals,
+        }, { onConflict: "user_id" });
+
+      if (error) throw error;
+      toast.success("Business profile saved!");
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Logged out successfully");
+    navigate("/auth");
+  };
+
   return (
     <motion.div
       variants={container}
@@ -74,6 +165,66 @@ export function SettingsView() {
       <motion.div variants={item}>
         <h2 className="font-heading text-xl font-semibold">Settings</h2>
         <p className="text-sm text-muted-foreground">Manage your account and preferences</p>
+      </motion.div>
+
+      {/* Business Profile */}
+      <motion.div variants={item}>
+        <Card variant="glow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Building className="h-5 w-5 text-primary" />
+              Business Profile
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="text-sm font-medium">Business Name *</label>
+                <input
+                  type="text"
+                  value={businessProfile.business_name}
+                  onChange={(e) => setBusinessProfile({ ...businessProfile, business_name: e.target.value })}
+                  className="mt-1 h-10 w-full rounded-lg border border-border bg-secondary/50 px-4 text-sm outline-none focus:border-primary"
+                  placeholder="Your Business Name"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Industry</label>
+                <input
+                  type="text"
+                  value={businessProfile.industry || ""}
+                  onChange={(e) => setBusinessProfile({ ...businessProfile, industry: e.target.value })}
+                  className="mt-1 h-10 w-full rounded-lg border border-border bg-secondary/50 px-4 text-sm outline-none focus:border-primary"
+                  placeholder="e.g., E-commerce, Technology"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Location</label>
+                <input
+                  type="text"
+                  value={businessProfile.location || ""}
+                  onChange={(e) => setBusinessProfile({ ...businessProfile, location: e.target.value })}
+                  className="mt-1 h-10 w-full rounded-lg border border-border bg-secondary/50 px-4 text-sm outline-none focus:border-primary"
+                  placeholder="City, Country"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Target Audience</label>
+                <input
+                  type="text"
+                  value={businessProfile.target_audience || ""}
+                  onChange={(e) => setBusinessProfile({ ...businessProfile, target_audience: e.target.value })}
+                  className="mt-1 h-10 w-full rounded-lg border border-border bg-secondary/50 px-4 text-sm outline-none focus:border-primary"
+                  placeholder="e.g., Young professionals, 25-35"
+                />
+              </div>
+            </div>
+            <Button variant="glow" onClick={saveBusinessProfile} disabled={loading} className="gap-2">
+              <Save className="h-4 w-4" />
+              {loading ? "Saving..." : "Save Profile"}
+            </Button>
+          </CardContent>
+        </Card>
       </motion.div>
 
       {/* Settings Sections */}
@@ -112,6 +263,22 @@ export function SettingsView() {
           </motion.div>
         );
       })}
+
+      {/* Logout */}
+      <motion.div variants={item}>
+        <Card variant="glass">
+          <CardContent className="p-4">
+            <Button
+              variant="outline"
+              className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Sign Out
+            </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
 
       {/* Help Section */}
       <motion.div variants={item}>
