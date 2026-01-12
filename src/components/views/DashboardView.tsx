@@ -1,9 +1,9 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   TrendingUp, 
   Users, 
   DollarSign, 
-  Package, 
   ArrowUpRight, 
   ArrowDownRight,
   Calendar,
@@ -12,42 +12,8 @@ import {
   Heart
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
-
-const statsCards = [
-  {
-    title: "Total Followers",
-    value: "124.5K",
-    change: "+12.3%",
-    isPositive: true,
-    icon: Users,
-    color: "primary",
-  },
-  {
-    title: "Engagement Rate",
-    value: "8.2%",
-    change: "+2.1%",
-    isPositive: true,
-    icon: Heart,
-    color: "accent",
-  },
-  {
-    title: "Revenue",
-    value: "$48,250",
-    change: "+18.2%",
-    isPositive: true,
-    icon: DollarSign,
-    color: "success",
-  },
-  {
-    title: "Active Leads",
-    value: "342",
-    change: "-3.1%",
-    isPositive: false,
-    icon: TrendingUp,
-    color: "info",
-  },
-];
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
 
 const engagementData = [
   { name: "Mon", value: 4000, posts: 2 },
@@ -73,12 +39,6 @@ const recentActivity = [
   { platform: "TikTok", type: "Video Trending", time: "3 hrs ago", engagement: "45K views" },
 ];
 
-const upcomingPosts = [
-  { title: "Product Launch Announcement", platform: "All Platforms", time: "Today, 3:00 PM" },
-  { title: "Behind the Scenes", platform: "Instagram, TikTok", time: "Tomorrow, 10:00 AM" },
-  { title: "Weekly Tips Thread", platform: "Twitter", time: "Tomorrow, 2:00 PM" },
-];
-
 const container = {
   hidden: { opacity: 0 },
   show: {
@@ -93,6 +53,87 @@ const item = {
 };
 
 export function DashboardView() {
+  const [stats, setStats] = useState({
+    leads: 0,
+    inventory: 0,
+    records: 0,
+    campaigns: 0,
+  });
+  const [upcomingPosts, setUpcomingPosts] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const [leadsRes, inventoryRes, recordsRes, campaignsRes, postsRes] = await Promise.all([
+        supabase.from("leads").select("id", { count: "exact" }).eq("user_id", user.id),
+        supabase.from("inventory").select("id", { count: "exact" }).eq("user_id", user.id),
+        supabase.from("business_records").select("id", { count: "exact" }).eq("user_id", user.id),
+        supabase.from("campaigns").select("id", { count: "exact" }).eq("user_id", user.id),
+        supabase.from("scheduled_posts").select("*").eq("user_id", user.id).order("scheduled_time", { ascending: true }).limit(3),
+      ]);
+
+      setStats({
+        leads: leadsRes.count || 0,
+        inventory: inventoryRes.count || 0,
+        records: recordsRes.count || 0,
+        campaigns: campaignsRes.count || 0,
+      });
+
+      if (postsRes.data) {
+        setUpcomingPosts(postsRes.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch stats");
+    }
+  };
+
+  const statsCards = [
+    {
+      title: "Total Leads",
+      value: stats.leads.toString(),
+      change: "+12.3%",
+      isPositive: true,
+      icon: Users,
+    },
+    {
+      title: "Engagement Rate",
+      value: "8.2%",
+      change: "+2.1%",
+      isPositive: true,
+      icon: Heart,
+    },
+    {
+      title: "Campaigns",
+      value: stats.campaigns.toString(),
+      change: "+18.2%",
+      isPositive: true,
+      icon: DollarSign,
+    },
+    {
+      title: "Active Records",
+      value: stats.records.toString(),
+      change: "+5.1%",
+      isPositive: true,
+      icon: TrendingUp,
+    },
+  ];
+
+  const displayPosts = upcomingPosts.length > 0 ? upcomingPosts.map(p => ({
+    title: p.title,
+    platform: p.platforms?.join(", ") || "All",
+    time: new Date(p.scheduled_time).toLocaleString(),
+  })) : [
+    { title: "Product Launch Announcement", platform: "All Platforms", time: "Today, 3:00 PM" },
+    { title: "Behind the Scenes", platform: "Instagram, TikTok", time: "Tomorrow, 10:00 AM" },
+    { title: "Weekly Tips Thread", platform: "Twitter", time: "Tomorrow, 2:00 PM" },
+  ];
+
   return (
     <motion.div
       variants={container}
@@ -102,7 +143,7 @@ export function DashboardView() {
     >
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {statsCards.map((stat, index) => {
+        {statsCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <motion.div key={stat.title} variants={item}>
@@ -118,11 +159,7 @@ export function DashboardView() {
                         ) : (
                           <ArrowDownRight className="h-4 w-4 text-destructive" />
                         )}
-                        <span
-                          className={
-                            stat.isPositive ? "text-sm text-success" : "text-sm text-destructive"
-                          }
-                        >
+                        <span className={stat.isPositive ? "text-sm text-success" : "text-sm text-destructive"}>
                           {stat.change}
                         </span>
                         <span className="text-xs text-muted-foreground">vs last week</span>
@@ -156,8 +193,8 @@ export function DashboardView() {
                   <AreaChart data={engagementData}>
                     <defs>
                       <linearGradient id="engagementGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(174 72% 56%)" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="hsl(174 72% 56%)" stopOpacity={0} />
+                        <stop offset="5%" stopColor="hsl(217 91% 60%)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(217 91% 60%)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="name" stroke="hsl(215 20% 55%)" fontSize={12} tickLine={false} axisLine={false} />
@@ -173,7 +210,7 @@ export function DashboardView() {
                     <Area
                       type="monotone"
                       dataKey="value"
-                      stroke="hsl(174 72% 56%)"
+                      stroke="hsl(217 91% 60%)"
                       strokeWidth={2}
                       fill="url(#engagementGradient)"
                     />
@@ -221,10 +258,7 @@ export function DashboardView() {
               <div className="mt-4 grid grid-cols-2 gap-2">
                 {platformData.map((platform) => (
                   <div key={platform.name} className="flex items-center gap-2">
-                    <div
-                      className="h-3 w-3 rounded-full"
-                      style={{ backgroundColor: platform.color }}
-                    />
+                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: platform.color }} />
                     <span className="text-xs text-muted-foreground">{platform.name}</span>
                     <span className="ml-auto text-xs font-medium">{platform.value}%</span>
                   </div>
@@ -278,7 +312,7 @@ export function DashboardView() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {upcomingPosts.map((post, index) => (
+                {displayPosts.map((post, index) => (
                   <div
                     key={index}
                     className="flex items-center justify-between rounded-lg bg-secondary/50 p-3 transition-colors hover:bg-secondary"
