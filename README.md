@@ -71,3 +71,8 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+  AI SECTION 
+  Example: AI analyzes your top-performing Instagram posts and suggests similar designs, tones, and content for new campaigns.
+          AI predicts when your audience is most active, increasing reach and engagement.
+          AI chatbots on Instagram, Facebook, or WhatsApp can respond instantly to FAQs like shade recommendations, pricing, and stock availability.
+          AI tools analyze beauty trends across TikTok, Instagram, and Pinterest so you can jump on viral challenges or product trends early.
