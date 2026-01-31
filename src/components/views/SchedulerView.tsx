@@ -13,6 +13,9 @@ import {
   Sparkles,
   ExternalLink,
   X,
+  CheckCircle,
+  Share2,
+  Instagram,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -68,6 +71,7 @@ export function SchedulerView() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showModal, setShowModal] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -164,10 +168,42 @@ export function SchedulerView() {
   };
 
   const sharePost = (post: ScheduledPost, platform: string) => {
+    if (platform === "instagram") {
+      copyToClipboard(post);
+      toast.success("Content copied! Now open Instagram to post", {
+        description: "Paste the content in your Instagram app",
+        duration: 5000,
+      });
+      return;
+    }
     const url = platformShareUrls[platform]?.(post.content);
     if (url) {
       window.open(url, "_blank", "width=600,height=400");
       toast.success(`Opening ${platform} share dialog`);
+    }
+  };
+
+  const copyToClipboard = async (post: ScheduledPost) => {
+    const fullContent = post.hashtags 
+      ? `${post.content}\n\n${post.hashtags.join(" ")}`
+      : post.content;
+    await navigator.clipboard.writeText(fullContent);
+    setCopiedId(post.id);
+    setTimeout(() => setCopiedId(null), 2000);
+    toast.success("Content copied to clipboard!");
+  };
+
+  const markAsPublished = async (post: ScheduledPost) => {
+    try {
+      const { error } = await supabase
+        .from("scheduled_posts")
+        .update({ status: "published" })
+        .eq("id", post.id);
+      if (error) throw error;
+      setPosts(posts.map(p => p.id === post.id ? { ...p, status: "published" } : p));
+      toast.success("Post marked as published!");
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -270,6 +306,34 @@ export function SchedulerView() {
 
                   <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{post.content}</p>
 
+                  {/* Quick Actions */}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => copyToClipboard(post)}
+                      className="gap-1 text-xs"
+                    >
+                      {copiedId === post.id ? (
+                        <CheckCircle className="h-3 w-3 text-success" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
+                      {copiedId === post.id ? "Copied!" : "Copy"}
+                    </Button>
+                    {post.status !== "published" && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => markAsPublished(post)}
+                        className="gap-1 text-xs"
+                      >
+                        <CheckCircle className="h-3 w-3" />
+                        Mark Posted
+                      </Button>
+                    )}
+                  </div>
+
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       {post.platforms.map((platform) => (
@@ -277,7 +341,7 @@ export function SchedulerView() {
                           key={platform}
                           onClick={() => sharePost(post, platform)}
                           className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground transition-all hover:bg-primary hover:text-primary-foreground"
-                          title={`Share on ${platform}`}
+                          title={platform === "instagram" ? "Copy & open Instagram" : `Share on ${platform}`}
                         >
                           <PlatformIcon platform={platform} />
                         </button>
