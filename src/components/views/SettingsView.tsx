@@ -15,6 +15,13 @@ import {
   MapPin,
   Target,
   LogOut,
+  Instagram,
+  Facebook,
+  Twitter,
+  Linkedin,
+  CheckCircle,
+  XCircle,
+  Link,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +38,20 @@ interface BusinessProfile {
   business_goals: string[] | null;
 }
 
+interface SocialAccount {
+  id: string;
+  platform: string;
+  account_name: string | null;
+  connected: boolean;
+}
+
+const socialPlatforms = [
+  { id: "instagram", name: "Instagram", icon: Instagram, color: "text-pink-500" },
+  { id: "facebook", name: "Facebook", icon: Facebook, color: "text-blue-500" },
+  { id: "twitter", name: "Twitter/X", icon: Twitter, color: "text-sky-400" },
+  { id: "linkedin", name: "LinkedIn", icon: Linkedin, color: "text-blue-600" },
+];
+
 const settingSections = [
   {
     title: "Account",
@@ -46,14 +67,6 @@ const settingSections = [
     items: [
       { label: "Email Notifications", description: "Receive updates via email", toggle: true },
       { label: "Push Notifications", description: "Get notified on your device", toggle: true },
-    ],
-  },
-  {
-    title: "Integrations",
-    icon: Globe,
-    items: [
-      { label: "Connected Accounts", description: "Manage your social media connections" },
-      { label: "API Access", description: "Generate and manage API keys" },
     ],
   },
   {
@@ -82,6 +95,7 @@ const item = {
 export function SettingsView() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
   const [businessProfile, setBusinessProfile] = useState<BusinessProfile>({
     business_name: "",
     industry: "",
@@ -92,6 +106,7 @@ export function SettingsView() {
 
   useEffect(() => {
     fetchBusinessProfile();
+    fetchSocialAccounts();
   }, []);
 
   const fetchBusinessProfile = async () => {
@@ -116,6 +131,74 @@ export function SettingsView() {
       }
     } catch (error) {
       // Profile might not exist yet
+    }
+  };
+
+  const fetchSocialAccounts = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("social_accounts")
+        .select("*")
+        .eq("user_id", user.id);
+
+      setSocialAccounts(data || []);
+    } catch (error) {
+      // Accounts might not exist yet
+    }
+  };
+
+  const connectSocialAccount = async (platform: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Please sign in first");
+        return;
+      }
+
+      // Check if already connected
+      const existing = socialAccounts.find(a => a.platform === platform);
+      if (existing?.connected) {
+        // Disconnect
+        await supabase
+          .from("social_accounts")
+          .update({ connected: false, account_name: null })
+          .eq("id", existing.id);
+        setSocialAccounts(socialAccounts.map(a => 
+          a.id === existing.id ? { ...a, connected: false, account_name: null } : a
+        ));
+        toast.success(`${platform} disconnected`);
+      } else {
+        // Simulate connection (in real app, this would be OAuth)
+        const { data, error } = await supabase
+          .from("social_accounts")
+          .upsert({
+            user_id: user.id,
+            platform,
+            connected: true,
+            account_name: `@your_${platform}_account`,
+          }, { onConflict: "user_id,platform" })
+          .select()
+          .single();
+
+        if (error) throw error;
+        
+        if (existing) {
+          setSocialAccounts(socialAccounts.map(a => 
+            a.platform === platform ? { ...a, connected: true, account_name: `@your_${platform}_account` } : a
+          ));
+        } else if (data) {
+          setSocialAccounts([...socialAccounts, data]);
+        }
+        
+        toast.success(`${platform} connected successfully!`, {
+          description: "You can now schedule posts for this platform",
+        });
+      }
+    } catch (error: any) {
+      toast.error(error.message);
     }
   };
 
@@ -223,6 +306,69 @@ export function SettingsView() {
               <Save className="h-4 w-4" />
               {loading ? "Saving..." : "Save Profile"}
             </Button>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Social Accounts */}
+      <motion.div variants={item}>
+        <Card variant="glow">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Link className="h-5 w-5 text-primary" />
+              Connected Social Accounts
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground mb-4">
+              Connect your social media accounts to enable direct posting and analytics tracking.
+            </p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {socialPlatforms.map((platform) => {
+                const Icon = platform.icon;
+                const account = socialAccounts.find(a => a.platform === platform.id);
+                const isConnected = account?.connected;
+                
+                return (
+                  <div
+                    key={platform.id}
+                    className={`flex items-center justify-between rounded-lg p-4 transition-colors ${
+                      isConnected ? "bg-success/10 border border-success/20" : "bg-secondary/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`rounded-lg p-2 ${isConnected ? "bg-success/10" : "bg-muted"}`}>
+                        <Icon className={`h-5 w-5 ${isConnected ? "text-success" : platform.color}`} />
+                      </div>
+                      <div>
+                        <p className="font-medium">{platform.name}</p>
+                        {isConnected && account?.account_name && (
+                          <p className="text-xs text-muted-foreground">{account.account_name}</p>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      variant={isConnected ? "outline" : "glow"}
+                      size="sm"
+                      onClick={() => connectSocialAccount(platform.id)}
+                      className={isConnected ? "gap-1" : ""}
+                    >
+                      {isConnected ? (
+                        <>
+                          <CheckCircle className="h-4 w-4 text-success" />
+                          Connected
+                        </>
+                      ) : (
+                        "Connect"
+                      )}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground mt-4">
+              Note: For Instagram, you'll copy content and post manually. Direct Instagram API posting requires a Meta Business account.
+            </p>
           </CardContent>
         </Card>
       </motion.div>
